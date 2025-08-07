@@ -6,7 +6,7 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-# Chave de API definida por variável de ambiente (ou valor padrão)
+# Chave de API definida por variável de ambiente
 API_KEY = os.environ.get("API_KEY", "minha-chave-secreta-123")
 
 @app.route("/info", methods=["POST"])
@@ -22,7 +22,10 @@ def get_info():
         return jsonify({"error": "URL inválida"}), 400
 
     try:
-        ydl_opts = {"quiet": True}
+        ydl_opts = {
+            "quiet": True,
+            "cookiefile": "cookies.txt"  # <- Suporte a cookies adicionados aqui
+        }
         with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
             if "entries" in info:
