@@ -1,12 +1,11 @@
+import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from yt_dlp import YoutubeDL
-import os
 
 app = Flask(__name__)
 CORS(app)
 
-# Chave de API definida por variável de ambiente
 API_KEY = os.environ.get("API_KEY", "minha-chave-secreta-123")
 
 @app.route("/info", methods=["POST"])
@@ -22,10 +21,13 @@ def get_info():
         return jsonify({"error": "URL inválida"}), 400
 
     try:
+        # Corrige o caminho para cookies.txt (um nível acima da pasta 'app/')
+        cookie_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "cookies.txt"))
         ydl_opts = {
             "quiet": True,
-            "cookiefile": "cookies.txt"  # <- Suporte a cookies adicionados aqui
+            "cookiefile": cookie_path
         }
+
         with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
             if "entries" in info:
