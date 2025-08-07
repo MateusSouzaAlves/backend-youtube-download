@@ -5,12 +5,14 @@ import os
 
 app = Flask(__name__)
 
-# Pasta onde os arquivos de saída serão salvos
+# Diretório de saída
 OUTPUT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "downloads"))
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# Caminho para o arquivo de cookies (está fora da pasta 'app')
-COOKIE_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "cookies"))
+# Caminho explícito para o arquivo de cookies
+COOKIE_FILE = "/opt/render/project/src/cookies"
+print("🧪 Verificando existência do arquivo de cookies:", COOKIE_FILE)
+print("🧪 Arquivo existe?", os.path.exists(COOKIE_FILE))
 
 
 @app.route("/download", methods=["POST"])
@@ -23,11 +25,9 @@ def download():
     audio_format = data.get("audio_format", "bestaudio")
     video_quality = data.get("video_quality", "best")
 
-    # Gera nome único para o arquivo de saída
     file_id = str(uuid.uuid4())
     output_template = os.path.join(OUTPUT_DIR, f"{file_id}.%(ext)s")
 
-    # Comando yt-dlp com cookies
     cmd = [
         "yt-dlp",
         "--cookies", COOKIE_FILE,
@@ -36,9 +36,10 @@ def download():
         url
     ]
 
+    print("🧪 Executando comando:", " ".join(cmd))
+
     try:
         subprocess.run(cmd, check=True)
-        # Procura o arquivo gerado
         for ext in ["mp4", "mkv", "webm"]:
             path = os.path.join(OUTPUT_DIR, f"{file_id}.{ext}")
             if os.path.exists(path):
